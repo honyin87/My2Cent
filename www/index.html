@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- Good default declaration:
+    * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+    * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+    * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+        * Enable inline JS: add 'unsafe-inline' to default-src
+        * Enable eval(): add 'unsafe-eval' to default-src
+    * Create your own at http://cspisawesome.com
+    -->
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+
+     <!-- Include jQuery Mobile stylesheets -->
+
+  <link rel="stylesheet" href="bower_components/jquery-mobile/jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="bower_components/jCalculator/jcalculator.css">
+  <!-- <link rel="stylesheet" href="css/themes/my2cent.min.css" />
+  <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" /> -->
+  <link rel="stylesheet" href="css/w3.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <!-- Include the jQuery library -->
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <!-- Include the jQuery Mobile library -->
+  <script src="bower_components/jquery/jquery-1.11.3.min.js"></script>
+  <script src="bower_components/jquery-mobile/jquery.mobile-1.4.5.min.js"></script>
+    <title>My2Cent</title>
+</head>
+
+<body>
+
+<div data-role="page" id="home">
+
+  <div data-role="header">
+	<a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+    <h1><b>My2Cent</b></h1>
+  </div>
+
+  <div data-role="main" class="ui-content">
+    <div class="card-container">
+	  <div class="w3-card-2 w3-container w3-half">
+
+        <label for="from_currency">From Currency</label>
+          <a href="#from_currency" class="ui-btn ui-icon-carat-r ui-btn-icon-right " id='btn_from'>USD</a>
+          <input type="number" name="txt_from" id="txt_from"  value='1' style="text-align:right;"/>
+        <hr/>
+        <label for="to_currency">To Currency</label>
+        <a href="#to_currency" class="ui-btn ui-icon-carat-r ui-btn-icon-right " id='btn_to'>MYR</a>
+        <div id='txt_to' class='w3-panel w3-white w3-border w3-padding-4' style="text-align:right;">0</div>
+        <div id="test"></div>
+	  </div>
+
+	</div>
+  </div>
+
+  <!-- <div data-role="footer">
+    <h1>Insert Footer Text Here</h1>
+  </div> -->
+</div>
+
+<div data-role="page" id="from_currency" data-position="right" data-display="overlay"> 
+<div data-role="header">
+  <a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+    <h1><b>My2Cent</b></h1>
+  </div>
+  <div data-role="main" class="ui-content">
+    <ul data-role="listview" data-inset="true" id="from_list" data-filter="true" data-autodividers="true">
+      <li><a href="#home">USA</a></li>
+    </ul>
+    </div>
+  </div> 
+  <div data-role="page" id="to_currency" data-position="right" data-display="overlay"> 
+  <div data-role="header">
+  <a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+    <h1><b>My2Cent</b></h1>
+  </div>
+  <div data-role="main" class="ui-content">
+    <ul data-role="listview" data-inset="true" id="to_list" data-filter="true" data-autodividers="true">
+      <li><a href="#home">USA</a></li>
+    </ul>
+    </div>
+  </div> 
+
+
+  <!--Error Page-->
+  <div data-role="page" id="error">
+
+  <div data-role="header">
+  <a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+    <h1><b>My2Cent</b></h1>
+  </div>
+
+  <div data-role="main" class="ui-content">
+    <div class="card-container">
+    <div class="w3-card-2 w3-container w3-half">
+
+        Server failed to response.
+    </div>
+
+  </div>
+  </div>
+</div>
+<script>
+var base_curr = 'USD';
+var latestCurrency;
+var latestDate;
+
+function prepareCurrencyList(result){
+      $('#from_list').empty();
+      $('#to_list').empty();
+        $.each(result, function(i, value) {
+            $('#from_list,#to_list').append('<li data-name="'+i+'"><a href="#home">'+i+ " - " +value+'</a></li>');
+            
+        });
+
+         $('#from_list').children('li').on('click', function () {
+           $('#btn_from').text($(this).attr('data-name'));
+           calculateCurrency();
+        });
+
+         $('#to_list').children('li').on('click', function () {
+           $('#btn_to').text($(this).attr('data-name'));
+           calculateCurrency();
+        });
+}
+
+function compareTime(start,end){
+
+  var timeStart = new Date(start).getTime();
+  var timeEnd = new Date(end).getTime();
+  var hourDiff = timeEnd - timeStart; //in ms
+  var secDiff = hourDiff / 1000; //in s
+  var minDiff = hourDiff / 60 / 1000; //in minutes
+  var hDiff = hourDiff / 3600 / 1000; //in hours
+  //alert(Math.floor(minDiff));
+  return Math.floor(hDiff);
+}
+
+function calculateCurrency(){
+  if(latestCurrency!=null){
+  var currFrom = latestCurrency.rates[$('#btn_from').text()];
+  var currTo = latestCurrency.rates[$('#btn_to').text()];
+
+  var result = ($('#txt_from').val()/currFrom)*currTo;
+  //alert($('#txt_from').val());
+  $('#txt_to').text(result);
+  }
+}
+
+$( document ).ready(function() {
+
+    var currencyList = localStorage.getItem("currencyList");
+
+    if(currencyList==null){
+
+    $.getJSON("https://openexchangerates.org/api/currencies.json", function(result){
+        localStorage.setItem("currencyList", JSON.stringify(result));
+        prepareCurrencyList(result);
+    });
+
+    }else{
+      prepareCurrencyList(JSON.parse(currencyList));
+    }
+
+   
+    latestDate = localStorage.getItem("latestDate");
+    
+  
+    if(latestDate==null || (latestDate!=null && compareTime(latestDate,new Date().toString())>1)){
+    $.getJSON("https://coinface.000webhostapp.com/getRate.php", function(result){
+        localStorage.setItem("latestCurrency", JSON.stringify(result));
+        localStorage.setItem("latestDate", new Date);
+        //alert(localStorage.getItem("latestDate"));
+		    latestCurrency= result;
+        //$('#test').text(result.rates['MYR']);
+
+        calculateCurrency();
+
+    }).error(function() { window.location.hash = '#error';  });
+
+    }else{
+      latestCurrency = JSON.parse(localStorage.getItem("latestCurrency"));
+    }
+
+    $('input[name=txt_from]').keyup(function() { calculateCurrency() });
+    $('input[name=txt_from]').change(function() { calculateCurrency() });
+
+
+    //calculate currency
+    calculateCurrency();
+
+});
+</script>
+</body>
+
+</html>

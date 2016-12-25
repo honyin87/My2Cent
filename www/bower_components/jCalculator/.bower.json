@@ -1,0 +1,14 @@
+{
+  "name": "jCalculator",
+  "homepage": "https://github.com/balajmarius/jCalculator",
+  "_release": "c6475d122f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "c6475d122fa066ebd98e8fc6d028d32a68a23597"
+  },
+  "_source": "https://github.com/balajmarius/jCalculator.git",
+  "_target": "*",
+  "_originalSource": "jCalculator",
+  "_direct": true
+}

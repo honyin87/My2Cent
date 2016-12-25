@@ -1,0 +1,26 @@
+[data-role=page]{height: 100% !important; position:relative !important;}
+[data-role=footer]{bottom:0; position:absolute !important; top: auto !important; width:100%;}
+
+.card-container > div {
+	//width: calc(100% - 2px);
+	margin-bottom:2%;
+	margin-right:auto;
+	margin-left: 1%;
+	float:left;
+}
+
+@media only screen and (min-width: 601px){
+.w3-half {
+    width: 49%;
+}
+}
+
+.jcalculator.light{
+	width:210px !important;
+}
+.ui-panel-wrapper{
+	height:100%;
+}
+.ui-content{
+	overflow-x:initial;
+}
