@@ -50,16 +50,26 @@
   <!-- Include the jQuery Mobile library -->
   <script src="bower_components/jquery/jquery-1.11.3.min.js"></script>
   <script src="bower_components/jquery-mobile/jquery.mobile-1.4.5.min.js"></script>
+  <!-- <script type="text/javascript" src="cordova.js"></script> -->
     <title>My2Cent</title>
 </head>
 
 <body>
 
 <div data-role="page" id="home">
+  <!-- panel -->
+  <div data-role="panel" id="panel" data-theme="a"> 
+    <ul data-role="listview">
+        <li><a href="#" onclick='updateCurrency();' data-rel="close">Update Currencies</a></li>
+        <li><a href="#about"  data-rel="close">About</a></li>
+        <li><a href="#"  onclick='closeApp();' data-rel="close">Exit</a></li>
+      </ul>
+  </div>
 
   <div data-role="header">
-	<a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  <a href="#panel" data-role="button" data-icon="bars" data-iconpos="notext" data-theme="b" data-inline="true" >My button</a>
     <h1><b>My2Cent</b></h1>
+  <a href="#" data-role="button" data-icon="refresh" data-iconpos="notext" data-theme="b" data-inline="true" onclick='location.reload();' >My button</a>
   </div>
 
   <div data-role="main" class="ui-content">
@@ -74,6 +84,8 @@
         <a href="#to_currency" class="ui-btn ui-icon-carat-r ui-btn-icon-right " id='btn_to'>MYR</a>
         <div id='txt_to' class='w3-panel w3-white w3-border w3-padding-4' style="text-align:right;">0</div>
         <div id="test"></div>
+        <hr/>
+        <a href="#" class="ui-btn ui-icon-recycle ui-btn-icon-right " id='btn_to' onclick='swap();'>Swap</a>
 	  </div>
 
 	</div>
@@ -86,7 +98,7 @@
 
 <div data-role="page" id="from_currency" data-position="right" data-display="overlay"> 
 <div data-role="header">
-  <a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  <a href="#home" data-role="button" data-icon="back" data-iconpos="notext" data-theme="b" data-inline="true">My button</a>
     <h1><b>My2Cent</b></h1>
   </div>
   <div data-role="main" class="ui-content">
@@ -97,7 +109,7 @@
   </div> 
   <div data-role="page" id="to_currency" data-position="right" data-display="overlay"> 
   <div data-role="header">
-  <a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  <a href="#home" data-role="button" data-icon="back" data-iconpos="notext" data-theme="b" data-inline="true">My button</a>
     <h1><b>My2Cent</b></h1>
   </div>
   <div data-role="main" class="ui-content">
@@ -112,7 +124,7 @@
   <div data-role="page" id="error">
 
   <div data-role="header">
-  <a href="#home" class="ui-btn ui-icon-home ui-btn-icon-left">Home</a>
+  <a href="#home" data-role="button" data-icon="back" data-iconpos="notext" data-theme="b" data-inline="true">My button</a>
     <h1><b>My2Cent</b></h1>
   </div>
 
@@ -126,6 +138,31 @@
   </div>
   </div>
 </div>
+
+<!--About Page-->
+  <div data-role="page" id="about">
+
+  <div data-role="header">
+  <a href="#home" data-role="button" data-icon="back" data-iconpos="notext" data-theme="b" data-inline="true">My button</a>
+    <h1><b>My2Cent</b></h1>
+  </div>
+
+  <div data-role="main" class="ui-content">
+    <div class="card-container">
+    <div class="w3-card-2 w3-container w3-half">
+
+        <b>Disclaimer</b><br/>
+        Exchange rates provided for informational purposes only and do not constitute financial advice of any kind. Although every attempt is made to ensure quality, no guarantees are made of accuracy, validity, availability, or fitness for any purpose.
+        <div>&nbsp;</div>
+        <div class='w3-container'><b>Source:</b> openexchangerates.org</div>
+        <div class='w3-container'><b>Author:</b> Nathan Chan</div>
+        <div class='w3-container'><b>Email:</b>  honyin87@gmail.com</div>
+    </div>
+
+  </div>
+  </div>
+</div>
+
 <script>
 var base_curr = 'USD';
 var latestCurrency;
@@ -173,6 +210,33 @@ function calculateCurrency(){
   }
 }
 
+function updateCurrency(){
+  console.log("updateCurrency");
+  $.getJSON("https://my2cent.000webhostapp.com/getRate.php", function(result){
+        localStorage.setItem("latestCurrency", JSON.stringify(result));
+        localStorage.setItem("latestDate", new Date);
+        //alert(localStorage.getItem("latestDate"));
+        latestCurrency= result;
+        //$('#test').text(result.rates['MYR']);
+
+        calculateCurrency();
+
+    }).error(function() { window.location.hash = '#error';  });
+}
+
+function closeApp(){
+  console.log("closeApp");
+  /*navigator.app.exitApp();*/
+}
+
+function swap(){
+    var temp = $('#btn_from').text();
+    $('#btn_from').text($('#btn_to').text());
+    $('#btn_to').text(temp);
+
+    calculateCurrency();
+}
+
 $( document ).ready(function() {
 
     var currencyList = localStorage.getItem("currencyList");
@@ -193,16 +257,7 @@ $( document ).ready(function() {
     
   
     if(latestDate==null || (latestDate!=null && compareTime(latestDate,new Date().toString())>1)){
-    $.getJSON("https://coinface.000webhostapp.com/getRate.php", function(result){
-        localStorage.setItem("latestCurrency", JSON.stringify(result));
-        localStorage.setItem("latestDate", new Date);
-        //alert(localStorage.getItem("latestDate"));
-		    latestCurrency= result;
-        //$('#test').text(result.rates['MYR']);
-
-        calculateCurrency();
-
-    }).error(function() { window.location.hash = '#error';  });
+      updateCurrency();
 
     }else{
       latestCurrency = JSON.parse(localStorage.getItem("latestCurrency"));
